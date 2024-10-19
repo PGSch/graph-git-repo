@@ -1,0 +1,83 @@
+name: "Graph Git Repo"
+description: "Generates a repository structure and Mermaid diagram using ChatGPT, uploads them as artifacts, and optionally creates a PR."
+author: "github-actions[bot]"
+inputs:
+  exclude_patterns:
+    description: 'Patterns to exclude (e.g., ".git|*.log|node_modules")'
+    required: false
+    default: '.git|.DS_Store|.idea|*.log|*.tmp|__pycache__'
+  depth:
+    description: 'Tree depth to consider'
+    required: false
+    default: '2'
+  create_pr:
+    description: 'Whether to create a pull request with the generated files'
+    required: false
+    default: 'false'
+    type: boolean
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout target repository code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Tree Command
+      run: sudo apt-get install -y tree
+
+    - name: Generate Repo Structure
+      run: |
+        chmod +x ${{ github.action_path }}/base.sh
+        bash ${{ github.action_path }}/base.sh '${{ inputs.exclude_patterns }}' '${{ inputs.depth }}'
+      shell: bash
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+
+    - name: Install Python dependencies
+      run: pip install openai
+
+    - name: Generate Mermaid Diagram using ChatGPT
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: python ${{ github.action_path }}/tree_to_gpt.py
+
+    - name: Upload Generated Files as Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: repo-structure-and-diagram
+        path: |
+          REPO_STRUCTURE.md
+          MERMAID_DIAGRAM.md
+
+    - name: Commit Changes (if create_pr is true)
+      if: inputs.create_pr == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add REPO_STRUCTURE.md MERMAID_DIAGRAM.md
+        git commit -m "[bot] Update repository structure and Mermaid diagram"
+      shell: bash
+
+    - name: Create Pull Request (if create_pr is true)
+      if: inputs.create_pr == 'true'
+      uses: peter-evans/create-pull-request@v6
+      with:
+        author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+        title: "Update repository structure and Mermaid diagram"
+        branch: update-repo-structure-${{ github.run_id }}
+        labels: "automated-update"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+branding:
+  icon: "git-merge"
+  color: "blue"
+
