@@ -18,6 +18,8 @@ output_file = "MERMAID_DIAGRAM.md"
 with open(input_file, 'r') as file:
     repo_structure = file.read()
 
+print(repo_structure)
+
 # Define the prompt to send to the ChatGPT API
 prompt = f"""
 The following is the directory structure of a Git repository:
