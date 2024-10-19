@@ -1,0 +1,60 @@
+name: graph-git-repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      exclude_patterns:
+        description: 'Patterns to exclude (e.g., ".git|*.log|node_modules")'
+        required: false
+        default: '.git|.DS_Store|.idea|*.log|*.tmp|__pycache__'
+      depth:
+        description: 'tree depth to consider'
+        required: false
+        default: '2'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Tree Command
+        run: sudo apt-get install -y tree
+
+      - name: Generate Repo Structure
+        run: |
+          chmod +x scripts/script.sh
+          ./base.sh '${{ github.event.inputs.exclude_patterns }}' '${{ github.event.inputs.depth }}'
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install openai
+
+      - name: Generate Mermaid Diagram using ChatGPT
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/tree_to_gpt.py
+
+      - name: Commit and push results
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add REPO_STRUCTURE.md MERMAID_DIAGRAM.md
+          git commit -m "Update repository structure and Mermaid diagram"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
