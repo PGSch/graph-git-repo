@@ -1,6 +1,5 @@
 name: "Graph Git Repo"
 description: "Generates a repository structure and Mermaid diagram using ChatGPT, uploads them as artifacts, and optionally creates a PR."
-author: "github-actions[bot]"
 inputs:
   exclude_patterns:
     description: 'Patterns to exclude (e.g., ".git|*.log|node_modules")'
@@ -15,7 +14,13 @@ inputs:
     required: false
     default: 'false'
     type: boolean
-  
+  openai_api_key:
+    description: 'OpenAI API key for generating diagrams'
+    required: true
+  github_token:
+    description: 'GitHub token for authentication'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -29,6 +34,7 @@ runs:
 
     - name: Install Tree Command
       run: sudo apt-get install -y tree
+      shell: bash
 
     - name: Generate Repo Structure
       run: |
@@ -43,11 +49,13 @@ runs:
 
     - name: Install Python dependencies
       run: pip install openai
+      shell: bash
 
     - name: Generate Mermaid Diagram using ChatGPT
       env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
       run: python ${{ github.action_path }}/tree_to_gpt.py
+      shell: bash
 
     - name: Upload Generated Files as Artifacts
       uses: actions/upload-artifact@v3
@@ -73,11 +81,10 @@ runs:
         author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
         title: "Update repository structure and Mermaid diagram"
         branch: update-repo-structure-${{ github.run_id }}
-        labels: "automated-update"
+        labels: "graph-git-repo"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
 
 branding:
   icon: "git-merge"
   color: "blue"
-
