@@ -12,7 +12,7 @@ inputs:
   create_pr:
     description: 'Whether to create a pull request with the generated files'
     required: false
-    default: 'false'
+    default: 'true'
     type: boolean
   openai_api_key:
     description: 'OpenAI API key for generating diagrams'
