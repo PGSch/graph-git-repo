@@ -6,6 +6,7 @@ graph-git-repo
 ├── MERMAID_DIAGRAM.md
 ├── README.md
 ├── REPO_STRUCTURE.md
+├── action.yml
 ├── base.sh
 └── tree_to_gpt.py
 ```
