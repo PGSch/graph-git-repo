@@ -33,9 +33,9 @@ jobs:
 
       - name: Generate Repo Structure
         run: |
-          chmod +x scripts/script.sh
-          ./base.sh '${{ github.event.inputs.exclude_patterns }}' '${{ github.event.inputs.depth }}'
-
+          chmod +x base.sh
+          bash base.sh '${{ github.event.inputs.exclude_patterns }}' '${{ github.event.inputs.depth }}'
+        shell: bash
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
@@ -47,14 +47,23 @@ jobs:
       - name: Generate Mermaid Diagram using ChatGPT
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python scripts/tree_to_gpt.py
+        run: python tree_to_gpt.py
 
-      - name: Commit and push results
+      - name: Commit Changes
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add REPO_STRUCTURE.md MERMAID_DIAGRAM.md
-          git commit -m "Update repository structure and Mermaid diagram"
-          git push
+          git commit -m "[bot] Update repository structure and Mermaid diagram"
+        shell: bash
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          title: "Update repository structure and Mermaid diagram"
+          branch: update-repo-structure
+          labels: "automated-update"
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
