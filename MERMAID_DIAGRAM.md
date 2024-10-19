@@ -1,17 +1,24 @@
 # Mermaid Diagram
 
 ```mermaid
-graph TB
+graph TD
     %% Repository Structure
     subgraph graph_git_repo
-        root[graph-git-repo]:::folder
-        root --> gitignore[.gitignore]:::file
-        root --> README[README.md]:::file
-        root --> REPO_STRUCTURE[REPO_STRUCTURE.md]:::file
-        root --> base[base.sh]:::file
-        root --> tree_to_gpt[tree_to_gpt.py]:::file
+        root[graph-git-repo]
+        root --> gitignore[.gitignore]
+        root --> license[LICENSE]
+        root --> mermaid[MERMAID_DIAGRAM.md]
+        root --> README[README.md]
+        root --> repo_structure[REPO_STRUCTURE.md]
+        root --> base[base.sh]
+        root --> tree_to_gpt[tree_to_gpt.py]
     end
     style graph_git_repo fill:#e0f7fa,stroke:#333,stroke-width:2px;
-    classDef folder fill:#80deea,stroke:#006064,stroke-width:2px;
-    classDef file fill:#ffffff,stroke:#004d40,stroke-width:2px;
+    style gitignore fill:#ffccbc,stroke:#333,stroke-width:1px;
+    style license fill:#ffccbc,stroke:#333,stroke-width:1px;
+    style mermaid fill:#ffccbc,stroke:#333,stroke-width:1px;
+    style README fill:#ffccbc,stroke:#333,stroke-width:1px;
+    style repo_structure fill:#ffccbc,stroke:#333,stroke-width:1px;
+    style base fill:#ffccbc,stroke:#333,stroke-width:1px;
+    style tree_to_gpt fill:#ffccbc,stroke:#333,stroke-width:1px;
 ```
