@@ -1,9 +1,6 @@
 name: graph-git-repo
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       exclude_patterns:
